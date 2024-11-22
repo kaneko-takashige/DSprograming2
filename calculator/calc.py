@@ -1,4 +1,5 @@
 import flet as ft
+import math
 
 
 class CalcButton(ft.ElevatedButton):
@@ -30,6 +31,18 @@ class ExtraActionButton(CalcButton):
         self.bgcolor = ft.colors.BLUE_GREY_100
         self.color = ft.colors.BLACK
 
+class FunctionButton(CalcButton):
+    def __init__(self, text, button_clicked):
+        CalcButton.__init__(self, text, button_clicked)
+        self.bgcolor = ft.colors.BLUE_GREY_100
+        self.color = ft.colors.BLACK
+
+class space(CalcButton):
+    def __init__(self, text, button_clicked):
+        CalcButton.__init__(self, text, button_clicked)
+        self.bgcolor = ft.colors.BLACK
+
+
 
 class CalculatorApp(ft.Container):
     # application's root control (i.e. "view") containing all other controls
@@ -37,8 +50,8 @@ class CalculatorApp(ft.Container):
         super().__init__()
         self.reset()
 
-        self.result = ft.Text(value="0", color=ft.colors.WHITE, size=20)
-        self.width = 350
+        self.result = ft.Text(value="0", color=ft.colors.WHITE, size=15)
+        self.width = 1500
         self.bgcolor = ft.colors.BLACK
         self.border_radius = ft.border_radius.all(20)
         self.padding = 20
@@ -47,6 +60,10 @@ class CalculatorApp(ft.Container):
                 ft.Row(controls=[self.result], alignment="end"),
                 ft.Row(
                     controls=[
+                        FunctionButton(text="sin", button_clicked=self.button_clicked),
+                        FunctionButton(text="cos", button_clicked=self.button_clicked),
+                        FunctionButton(text="tan", button_clicked=self.button_clicked),
+
                         ExtraActionButton(
                             text="AC", button_clicked=self.button_clicked
                         ),
@@ -59,6 +76,10 @@ class CalculatorApp(ft.Container):
                 ),
                 ft.Row(
                     controls=[
+                        FunctionButton(text="x!", button_clicked=self.button_clicked),
+                        FunctionButton(text="log10(x)", button_clicked=self.button_clicked),
+                        space(text=" ", button_clicked=self.button_clicked),
+
                         DigitButton(text="7", button_clicked=self.button_clicked),
                         DigitButton(text="8", button_clicked=self.button_clicked),
                         DigitButton(text="9", button_clicked=self.button_clicked),
@@ -67,6 +88,10 @@ class CalculatorApp(ft.Container):
                 ),
                 ft.Row(
                     controls=[
+                        space(text=" ", button_clicked=self.button_clicked),
+                        space(text=" ", button_clicked=self.button_clicked),
+                        space(text=" ", button_clicked=self.button_clicked),
+
                         DigitButton(text="4", button_clicked=self.button_clicked),
                         DigitButton(text="5", button_clicked=self.button_clicked),
                         DigitButton(text="6", button_clicked=self.button_clicked),
@@ -75,6 +100,10 @@ class CalculatorApp(ft.Container):
                 ),
                 ft.Row(
                     controls=[
+                        space(text=" ", button_clicked=self.button_clicked),
+                        space(text=" ", button_clicked=self.button_clicked),
+                        space(text=" ", button_clicked=self.button_clicked),
+
                         DigitButton(text="1", button_clicked=self.button_clicked),
                         DigitButton(text="2", button_clicked=self.button_clicked),
                         DigitButton(text="3", button_clicked=self.button_clicked),
@@ -83,9 +112,11 @@ class CalculatorApp(ft.Container):
                 ),
                 ft.Row(
                     controls=[
-                        DigitButton(
-                            text="0", expand=2, button_clicked=self.button_clicked
-                        ),
+                        space(text=" ", button_clicked=self.button_clicked),
+                        space(text=" ", button_clicked=self.button_clicked),
+                        space(text=" ", button_clicked=self.button_clicked),
+
+                        DigitButton(text="0", expand=2, button_clicked=self.button_clicked),
                         DigitButton(text=".", button_clicked=self.button_clicked),
                         ActionButton(text="=", button_clicked=self.button_clicked),
                     ]
@@ -137,6 +168,24 @@ class CalculatorApp(ft.Container):
                     self.format_number(abs(float(self.result.value)))
                 )
 
+        elif data in ("sin", "cos", "tan"):
+            self.result.value = self.calculate(
+                float(self.result.value), 0, data
+            )
+            self.reset()
+
+        elif data in ("x!"):
+            self.result.value = self.calculate(
+                float(self.result.value), 0, data
+            )
+            self.reset()
+
+        elif data in ("log10(x)"):
+            self.result.value = self.calculate(
+                float(self.result.value), 0, data
+            )
+            self.reset()
+
         self.update()
 
     def format_number(self, num):
@@ -161,6 +210,28 @@ class CalculatorApp(ft.Container):
                 return "Error"
             else:
                 return self.format_number(operand1 / operand2)
+            
+        elif operator == "sin":
+            return self.format_number(math.sin(operand1))
+        
+        elif operator == "cos":
+            return self.format_number(math.cos(operand1))
+        
+        elif operator == "tan":
+            if operand1 == 90:
+                return "Error"
+            else:
+                return self.format_number(math.tan(operand1))
+        
+        elif operator == "x!":
+            if operand1 < 0 or not operand1.is_integer():
+                return "Error"
+            return self.format_number(math.factorial(int(operand1)))
+        
+        elif operator == "log10(x)":
+            if operand1 <= 0:
+                return "Error"
+            return self.format_number(math.log10(operand1))
 
     def reset(self):
         self.operator = "+"
